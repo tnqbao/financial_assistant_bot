@@ -1,32 +1,63 @@
 package main
 
 import (
-	"github.com/joho/godotenv"
-	"github.com/tnqbao/gau_assistant/modules/discord-bot/q-and-a-bot"
+	"context"
+	"github.com/tnqbao/financial_gaubot/config/gemini_api"
 	"log"
 	"os"
+	"os/signal"
+	"syscall"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/joho/godotenv"
+	"github.com/tnqbao/financial_gaubot/config/database"
+	telegram_bot "github.com/tnqbao/financial_gaubot/modules/telegram-bot"
 )
 
 func main() {
-	err := godotenv.Load()
+	if err := godotenv.Load(); err != nil {
+		log.Println("⚠ Không tìm thấy file .env, sử dụng biến môi trường hệ thống")
+	}
+
+	gemini_api.LoadAPIKeys()
+	db := database.InitDB()
+	if db == nil {
+		log.Fatal("❌ Lỗi kết nối database")
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	ctx = context.WithValue(ctx, "db", db)
+	defer cancel()
+
+	telegramToken := os.Getenv("TELEGRAM_BOT_TOKEN")
+	if telegramToken == "" {
+		log.Fatal("❌ Chưa thiết lập TELEGRAM_BOT_TOKEN trong môi trường")
+	}
+
+	bot, err := tgbotapi.NewBotAPI(telegramToken)
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		log.Fatal("❌ Lỗi khởi tạo bot Telegram:", err)
 	}
+	bot.Debug = true
 
-	token := os.Getenv("DISCORD_TOKEN")
-	if token == "" {
-		log.Fatal("No Discord token provided")
-	}
+	log.Println("🤖 Bot Telegram đã sẵn sàng, chờ tin nhắn...")
 
-	bot, err := q_and_a_bot.NewDiscordBot(token)
-	if err != nil {
-		log.Fatalf("Error creating Discord bot: %v", err)
-	}
+	u := tgbotapi.NewUpdate(0)
+	u.Timeout = 60
+	updates := bot.GetUpdatesChan(u)
 
-	err = bot.Run()
-	if err != nil {
-		log.Fatalf("Error running Discord bot: %v", err)
-	}
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
 
-	select {}
+	go func() {
+		for update := range updates {
+			if update.Message != nil {
+				go telegram_bot.HandleCommand(ctx, bot, update)
+			}
+		}
+	}()
+
+	<-sigChan
+	log.Println("🛑 Bot đang tắt...")
+	cancel()
 }

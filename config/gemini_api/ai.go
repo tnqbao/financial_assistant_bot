@@ -9,13 +9,11 @@ import (
 )
 
 type AIClient struct {
-	APIKey string
 	APIURL string
 }
 
 func NewAIClient() *AIClient {
 	return &AIClient{
-		APIKey: os.Getenv("GEMINI_API_KEY"),
 		APIURL: os.Getenv("GEMINI_API_URL"),
 	}
 }
@@ -37,11 +35,13 @@ type AIResponse struct {
 }
 
 func (client *AIClient) GetResponse(input string) (string, error) {
+	apiKey := GetNextAPIKey()
+
 	payload := map[string]interface{}{
 		"contents": []map[string]interface{}{
 			{
 				"parts": []map[string]string{
-					{"text": input + ", p/s:(trả lời không được vượt quá 1700 kí tự)"},
+					{"text": input},
 				},
 			},
 		},
@@ -52,7 +52,7 @@ func (client *AIClient) GetResponse(input string) (string, error) {
 		return "", err
 	}
 
-	req, err := http.NewRequest("POST", client.APIURL+"?key="+client.APIKey, bytes.NewBuffer(jsonPayload))
+	req, err := http.NewRequest("POST", client.APIURL+"?key="+apiKey, bytes.NewBuffer(jsonPayload))
 	if err != nil {
 		return "", err
 	}
@@ -60,9 +60,15 @@ func (client *AIClient) GetResponse(input string) (string, error) {
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
+		RemoveAPIKey(apiKey)
 		return "", err
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		RemoveAPIKey(apiKey)
+		return "", fmt.Errorf("API lỗi: %d", resp.StatusCode)
+	}
 
 	var result AIResponse
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
