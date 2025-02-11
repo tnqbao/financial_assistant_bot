@@ -8,5 +8,5 @@ RUN go build -o main .
 FROM alpine:latest
 WORKDIR /financial_assistant_gau
 COPY --from=builder /financial_assistant_gau/main .
-EXPOSE 8900
+EXPOSE 8901
 CMD ["./main"]
