@@ -26,7 +26,12 @@ func HandleSumReport(ctx context.Context, bot *tgbotapi.BotAPI, chatID int64, pe
 		return
 	}
 
-	loc, _ := time.LoadLocation("Asia/Ho_Chi_Minh")
+	loc, err := time.LoadLocation("Asia/Ho_Chi_Minh")
+	if err != nil {
+		bot.Send(tgbotapi.NewMessage(chatID, "❌ Lỗi khi nạp múi giờ"))
+		return
+	}
+
 	now := time.Now().In(loc)
 	var start, end time.Time
 
@@ -35,10 +40,10 @@ func HandleSumReport(ctx context.Context, bot *tgbotapi.BotAPI, chatID int64, pe
 		start = now.Truncate(24 * time.Hour)
 		end = start.Add(24 * time.Hour)
 	case "month":
-		start = time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.Local)
+		start = time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, loc)
 		end = start.AddDate(0, 1, 0)
 	case "year":
-		start = time.Date(now.Year(), 1, 1, 0, 0, 0, 0, time.Local)
+		start = time.Date(now.Year(), 1, 1, 0, 0, 0, 0, loc)
 		end = start.AddDate(1, 0, 0)
 	default:
 		bot.Send(tgbotapi.NewMessage(chatID, "⚠ Không xác định được khoảng thời gian"))
@@ -46,7 +51,7 @@ func HandleSumReport(ctx context.Context, bot *tgbotapi.BotAPI, chatID int64, pe
 	}
 
 	var total float64
-	err := db.Model(&utils.Payment{}).
+	err = db.Model(&utils.Payment{}).
 		Where("chat_id = ? AND date_paid >= ? AND date_paid < ?", chatID, start, end).
 		Select("COALESCE(SUM(price), 0)").
 		Scan(&total).Error
