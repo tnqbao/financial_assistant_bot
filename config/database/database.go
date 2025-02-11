@@ -2,7 +2,7 @@ package database
 
 import (
 	"fmt"
-	"github.com/tnqbao/financial_gaubot/utils"
+	"github.com/tnqbao/financial_management_bot/utils"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"log"

@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"github.com/tnqbao/financial_gaubot/config/gemini_api"
+	"github.com/tnqbao/financial_management_bot/config/gemini_api"
 	"log"
 	"os"
 	"os/signal"
@@ -10,8 +10,8 @@ import (
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/joho/godotenv"
-	"github.com/tnqbao/financial_gaubot/config/database"
-	telegram_bot "github.com/tnqbao/financial_gaubot/modules/telegram-bot"
+	"github.com/tnqbao/financial_management_bot/config/database"
+	telegram_bot "github.com/tnqbao/financial_management_bot/modules/telegram-bot"
 )
 
 func main() {

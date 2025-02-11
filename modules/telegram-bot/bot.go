@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/tnqbao/financial_gaubot/config/gemini_api"
+	"github.com/tnqbao/financial_management_bot/config/gemini_api"
 	"gorm.io/gorm"
 )
 

@@ -8,8 +8,7 @@ users.
 ## Platforms Intergrated
 
 <ul>
-    <li>Messenger</li>
-    <li>Discord</li>
+    <li>Telegram</li>
     <li>Update soon ...</li>
 </ul>
 
@@ -24,8 +23,8 @@ users.
 
 * Clone the repository:
    ``` bash
-    git clone https://github.com/tnqbao/gau_assistant.git
-    cd gau_assistant
+    git clone https://github.com/tnqbao/financial_management_bot.git
+    cd financial_management_bot
    ```
 * Setup your module:
   ``` bash
@@ -36,15 +35,17 @@ users.
     go mod tidy 
   ``` 
 
-* Set up environment variables:
-    * Create a `.env` file in the project root and configure the following variables:
-  ```dotenv
-    GEMINI_API_KEY=your-gemini-api-key
-    GEMINI_API_URL=api-model-url
-    DISCORD_TOKEN=your-discord-token
-    MESSENGER_TOKEN=your-messenger-token
+  * Set up environment variables:
+      * Create a `.env` file in the project root and configure the following variables:
+    ```dotenv
+      GEMINI_API_KEYS=your-gemini-api-key (1 or more split by comma ',') 
+      GEMINI_API_URL=your-gemini-api-url
+      POSTGRES_USER=your-postgres-user
+      POSTGRES_PASSWORD=your-postgres-password
+      POSTGRES_DB=your-postgres-db
+      POSTGRES_HOST=your-postgres-host
+      TELEGRAM_BOT_TOKEN=your-telegram-bot-token
     ```
-
 
 * Start the server:
     ``` bash 

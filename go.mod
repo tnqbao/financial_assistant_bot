@@ -1,4 +1,4 @@
-module github.com/tnqbao/financial_gaubot
+module github.com/tnqbao/financial_management_bot
 
 go 1.23.4
 
