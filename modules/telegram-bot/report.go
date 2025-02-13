@@ -26,13 +26,9 @@ func HandleSumReport(ctx context.Context, bot *tgbotapi.BotAPI, chatID int64, pe
 		return
 	}
 
-	loc, err := time.LoadLocation("Asia/Ho_Chi_Minh")
-	if err != nil {
-		bot.Send(tgbotapi.NewMessage(chatID, "❌ Lỗi khi nạp múi giờ"))
-		return
-	}
-
+	loc := time.FixedZone("Asia/Ho_Chi_Minh", 7*60*60) // UTC +7 giờ
 	now := time.Now().In(loc)
+
 	var start, end time.Time
 
 	switch period {
@@ -51,7 +47,7 @@ func HandleSumReport(ctx context.Context, bot *tgbotapi.BotAPI, chatID int64, pe
 	}
 
 	var total float64
-	err = db.Model(&utils.Payment{}).
+	err := db.Model(&utils.Payment{}).
 		Where("chat_id = ? AND date_paid >= ? AND date_paid < ?", chatID, start, end).
 		Select("COALESCE(SUM(price), 0)").
 		Scan(&total).Error

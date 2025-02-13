@@ -13,11 +13,8 @@ import (
 )
 
 func ParseAddPaidMessagesWithGemini(inputText string, chatID int64) ([]utils.Payment, error) {
-	loc, err := time.LoadLocation("Asia/Ho_Chi_Minh")
-	if err != nil {
-		return nil, fmt.Errorf("Lỗi xử lý múi giờ: %v", err)
-	}
-	currentDate := time.Now().In(loc)
+	loc := time.FixedZone("Asia/Ho_Chi_Minh", 7*60*60) // UTC +7 giờ
+	now := time.Now().In(loc)
 
 	prompt := fmt.Sprintf(`
 	(Văn bản: "%s") với (thời điểm hiện tại: %s)
@@ -39,7 +36,7 @@ func ParseAddPaidMessagesWithGemini(inputText string, chatID int64) ([]utils.Pay
 		}
 	]
 	Lưu ý: Chỉ trả về **DUY NHẤT** JSON, không có bất kỳ văn bản nào khác!
-`, inputText, currentDate.Format("2006-01-02"), chatID, chatID)
+`, inputText, now.Format("2006-01-02"), chatID, chatID)
 
 	aiClient := gemini_api.NewAIClient()
 	resp, err := aiClient.GetResponse(prompt)
